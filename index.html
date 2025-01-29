@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>School Factory</title>
   <style>
-    /* Reset and Box-Sizing */
     * {
       margin: 0;
       padding: 0;
@@ -53,11 +52,12 @@
 
     .upgrades-column {
       background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      flex: 1;
     }
 
     .tasks-column {
       background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
-      flex: 2; /* Twice as wide as the upgrades column */
+      flex: 2;
     }
 
     .button-container {
@@ -97,24 +97,16 @@
     }
 
     .task-button.pending {
-      background-color: #f39c12;
+      background-color: #e67e22;
     }
 
-    .task-button.completed {
+    .task-button.active {
       background-color: #2ecc71;
-      animation: completeAnimation 1s ease-in-out forwards;
     }
 
-    @keyframes completeAnimation {
-      0% {
-        background-color: #f39c12;
-      }
-      50% {
-        background-color: #2ecc71;
-      }
-      100% {
-        background-color: #2ecc71;
-      }
+    .task-button.locked {
+      background-color: #7f8c8d;
+      cursor: not-allowed;
     }
 
     .tooltip {
@@ -145,27 +137,17 @@
       opacity: 1;
     }
 
-    #help-modal {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    .stats {
+      margin-top: 10px;
     }
 
-    .help-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+    .settings-button {
       background-color: #007bff;
       color: white;
-      padding: 10px 20px;
+      padding: 10px;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -176,48 +158,63 @@
     <div class="column upgrades-column">
       <h2>Upgrades</h2>
       <div class="button-container">
-        <button id="upgrade-classroom" class="upgrade-button" disabled>Upgrade Classroom: 10 KP</button>
-        <button id="upgrade-library" class="upgrade-button" disabled>Upgrade Library: 50 KP</button>
-        <button id="upgrade-computer" class="upgrade-button" disabled>Upgrade Computer Lab: 100 KP</button>
+        <div class="tooltip">
+          <button id="upgrade-classroom" class="upgrade-button" disabled>Upgrade Classroom: 10 KP</button>
+          <span class="tooltiptext">Increases your KP per second!</span>
+        </div>
+        <div class="tooltip">
+          <button id="upgrade-library" class="upgrade-button" disabled>Upgrade Library: 50 KP</button>
+          <span class="tooltiptext">Boosts KP generation rate!</span>
+        </div>
+        <div class="tooltip">
+          <button id="upgrade-computer" class="upgrade-button" disabled>Upgrade Computer Lab: 100 KP</button>
+          <span class="tooltiptext">Further enhances KP generation!</span>
+        </div>
       </div>
     </div>
 
-    <!-- Tasks Section (Expanded width) -->
+    <!-- Tasks Section (Twice as wide) -->
     <div class="column tasks-column">
       <h2>Tasks</h2>
       <div class="button-container">
-        <button id="task-study-Requirement-0-KP" class="task-button" disabled>Study - CD: 0s</button>
-        <button id="task-research-Requirement-100-KP" class="task-button" disabled>Research - CD: 0s</button>
-        <button id="task-laboratory-Requirement-250-KP" class="task-button" disabled>Lab Work - CD: 0s</button>
-        <button id="task-programming-Requirement-500-KP" class="task-button" disabled>Programming - CD: 0s</button>
-        <button id="task-mentoring-Requirement-1000-KP" class="task-button" disabled>Mentoring - CD: 0s</button>
-        <button id="task-teaching-Requirement-2000-KP" class="task-button" disabled>Teaching - CD: 0s</button>
-        <button id="task-workshop-Requirement-3000-KP" class="task-button" disabled>Workshop - CD: 0s</button>
-        <button id="task-conference-Requirement-4000-KP" class="task-button" disabled>Conference - CD: 0s</button>
-        <button id="task-coding-Requirement-5000-KP" class="task-button" disabled>Coding Challenge - CD: 0s</button>
-        <button id="task-bookwriting-Requirement-6000-KP" class="task-button" disabled>Book Writing - CD: 0s</button>
+        <div class="tooltip">
+          <button id="task-study" class="task-button">Study - CD: 0s</button>
+          <span class="tooltiptext">Earn KP by studying!</span>
+        </div>
+        <div class="tooltip">
+          <button id="task-research" class="task-button locked">Research - CD: 0s</button>
+          <span class="tooltiptext">Requirement: 100 KP. Research to unlock more tasks!</span>
+        </div>
+        <div class="tooltip">
+          <button id="task-laboratory" class="task-button locked">Lab Work - CD: 0s</button>
+          <span class="tooltiptext">Requirement: 250 KP. Lab tasks give big rewards!</span>
+        </div>
+        <div class="tooltip">
+          <button id="task-programming" class="task-button locked">Programming - CD: 0s</button>
+          <span class="tooltiptext">Requirement: 500 KP. Solve programming challenges!</span>
+        </div>
       </div>
     </div>
 
-    <!-- Settings Section (Game Stats) -->
+    <!-- Stats Section -->
     <div class="column">
-      <h2>Settings / Stats</h2>
+      <h2>Stats</h2>
       <div class="stats">
-        <p>KP: <span id="kp">0</span></p>
-        <p>Classroom Level: <span id="classroom-level">0</span></p>
+        <p>Total KP: <span id="total-kp">0</span></p>
+        <p>Total KP Earned: <span id="total-earned-kp">0</span></p>
+        <p>KP Per Second: <span id="kp-per-second">1</span></p>
       </div>
+      <button class="settings-button" onclick="showHelp()">Help</button>
     </div>
   </div>
 
-  <!-- Help/Settings Button -->
-  <button class="help-button" onclick="showHelp()">Help/Settings</button>
-
   <!-- Help Modal -->
-  <div id="help-modal">
+  <div id="help-modal" style="display: none;">
     <h2>Help & Information</h2>
     <p>Welcome to School Factory! In this game, you generate Knowledge Points (KP) and use them to upgrade your school.</p>
     <ul>
-      <li><strong>Upgrade Classroom</strong>: Cost: 10 KP, increases classroom level.</li>
+      <li><strong>Upgrade Classroom</strong>: Cost: 10 KP, increases KP per second.</li>
+      <li><strong>Upgrade Library</strong>: Cost: 50 KP, increases KP generation rate.</li>
       <li><strong>Tasks</strong>: Complete tasks to earn KP over time. Requirements vary for each task.</li>
     </ul>
     <button onclick="closeHelp()">Close</button>
@@ -225,40 +222,44 @@
 
   <script>
     let knowledgePoints = 0;
-    let classroomLevel = 0;
+    let totalKP = 0;
+    let totalEarnedKP = 0;
+    let passiveKpPerSecond = 1;
     let taskCooldowns = {
       study: 0,
       research: 0,
       laboratory: 0,
-      programming: 0,
-      mentoring: 0,
-      teaching: 0,
-      workshop: 0,
-      conference: 0,
-      coding: 0,
-      bookwriting: 0
+      programming: 0
     };
 
-    const kpElement = document.getElementById("kp");
-    const classroomLevelElement = document.getElementById("classroom-level");
+    const kpElement = document.getElementById("total-kp");
+    const totalEarnedKpElement = document.getElementById("total-earned-kp");
+    const kpPerSecondElement = document.getElementById("kp-per-second");
 
-    // Task buttons
     const taskButtons = {
-      study: document.getElementById("task-study-Requirement-0-KP"),
-      research: document.getElementById("task-research-Requirement-100-KP"),
-      laboratory: document.getElementById("task-laboratory-Requirement-250-KP"),
-      programming: document.getElementById("task-programming-Requirement-500-KP"),
-      mentoring: document.getElementById("task-mentoring-Requirement-1000-KP"),
-      teaching: document.getElementById("task-teaching-Requirement-2000-KP"),
-      workshop: document.getElementById("task-workshop-Requirement-3000-KP"),
-      conference: document.getElementById("task-conference-Requirement-4000-KP"),
-      coding: document.getElementById("task-coding-Requirement-5000-KP"),
-      bookwriting: document.getElementById("task-bookwriting-Requirement-6000-KP")
+      study: document.getElementById("task-study"),
+      research: document.getElementById("task-research"),
+      laboratory: document.getElementById("task-laboratory"),
+      programming: document.getElementById("task-programming")
+    };
+
+    const taskRequirements = {
+      research: 100,
+      laboratory: 250,
+      programming: 500
+    };
+
+    const unlockedTasks = {
+      research: false,
+      laboratory: false,
+      programming: false
     };
 
     function updateGame() {
       kpElement.textContent = knowledgePoints;
-      classroomLevelElement.textContent = classroomLevel;
+      totalEarnedKpElement.textContent = totalEarnedKP;
+      kpPerSecondElement.textContent = passiveKpPerSecond;
+
       updateButtons();
     }
 
@@ -271,17 +272,40 @@
       // Tasks
       for (const task in taskButtons) {
         const button = taskButtons[task];
-        const taskRequirement = parseInt(button.id.split('-')[2]);
+        const taskRequirement = taskRequirements[task] || 0;
         const cooldown = taskCooldowns[task];
         button.disabled = knowledgePoints < taskRequirement || cooldown > 0;
+
+        // Update text for cooldown display
         button.textContent = `${button.textContent.split(' - ')[0]} - CD: ${cooldown}s`;
+
+        // Set button state (locked, pending, completed)
+        if (!unlockedTasks[task] && knowledgePoints >= taskRequirement) {
+          unlockedTasks[task] = true;
+          button.classList.remove("locked");
+          button.classList.add("pending");
+        }
+
+        if (unlockedTasks[task]) {
+          if (cooldown > 0) {
+            button.classList.add("pending");
+            button.classList.remove("locked", "active");
+          } else {
+            button.classList.remove("pending", "active");
+          }
+        }
+
+        if (knowledgePoints < taskRequirement) {
+          button.classList.add("locked");
+          button.classList.remove("pending", "active");
+        }
       }
     }
 
     function upgradeClassroom() {
       if (knowledgePoints >= 10) {
         knowledgePoints -= 10;
-        classroomLevel++;
+        passiveKpPerSecond++;
         updateGame();
       }
     }
@@ -289,6 +313,7 @@
     function upgradeLibrary() {
       if (knowledgePoints >= 50) {
         knowledgePoints -= 50;
+        passiveKpPerSecond += 2;
         updateGame();
       }
     }
@@ -296,22 +321,25 @@
     function upgradeComputer() {
       if (knowledgePoints >= 100) {
         knowledgePoints -= 100;
+        passiveKpPerSecond += 5;
         updateGame();
       }
     }
 
     function startTask(task) {
-      if (taskCooldowns[task] === 0) {
+      if (taskCooldowns[task] === 0 && unlockedTasks[task]) {
         taskCooldowns[task] = 10;  // Set cooldown time to 10 seconds
-        taskButtons[task].classList.add("pending");
-        
+        taskButtons[task].classList.add("active");
+
         // Simulate task completion
         const cooldownInterval = setInterval(() => {
           taskCooldowns[task]--;
           if (taskCooldowns[task] === 0) {
             clearInterval(cooldownInterval);
-            taskButtons[task].classList.remove("pending");
-            taskButtons[task].classList.add("completed");
+            taskButtons[task].classList.remove("active");
+            knowledgePoints += 50; // Simulate earning 50 KP per task
+            totalEarnedKP += 50;
+            updateGame();
           }
           updateButtons();
         }, 1000);
@@ -330,19 +358,17 @@
     document.getElementById("upgrade-library").onclick = upgradeLibrary;
     document.getElementById("upgrade-computer").onclick = upgradeComputer;
 
-    document.getElementById("task-study-Requirement-0-KP").onclick = () => startTask('study');
-    document.getElementById("task-research-Requirement-100-KP").onclick = () => startTask('research');
-    document.getElementById("task-laboratory-Requirement-250-KP").onclick = () => startTask('laboratory');
-    document.getElementById("task-programming-Requirement-500-KP").onclick = () => startTask('programming');
-    document.getElementById("task-mentoring-Requirement-1000-KP").onclick = () => startTask('mentoring');
-    document.getElementById("task-teaching-Requirement-2000-KP").onclick = () => startTask('teaching');
-    document.getElementById("task-workshop-Requirement-3000-KP").onclick = () => startTask('workshop');
-    document.getElementById("task-conference-Requirement-4000-KP").onclick = () => startTask('conference');
-    document.getElementById("task-coding-Requirement-5000-KP").onclick = () => startTask('coding');
-    document.getElementById("task-bookwriting-Requirement-6000-KP").onclick = () => startTask('bookwriting');
+    document.getElementById("task-study").onclick = () => startTask('study');
+    document.getElementById("task-research").onclick = () => startTask('research');
+    document.getElementById("task-laboratory").onclick = () => startTask('laboratory');
+    document.getElementById("task-programming").onclick = () => startTask('programming');
 
-    updateGame();
+    // Initialize game
+    setInterval(() => {
+      knowledgePoints += passiveKpPerSecond; // Add passive KP every second
+      totalEarnedKP += passiveKpPerSecond; // Add to total earned KP
+      updateGame();
+    }, 1000);
   </script>
-
 </body>
 </html>
