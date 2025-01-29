@@ -7,54 +7,106 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      background-image: url('https://www.transparenttextures.com/patterns/diagonal-stripes.png'); /* Soft striped background */
-      background-color: #f2f2f2;
       margin: 0;
       padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background: linear-gradient(135deg, #ffafbd, #ffc3a0); /* Soft gradient background */
+      overflow: hidden;
     }
     #game-container {
-      margin-top: 50px;
       padding: 20px;
-      background-color: #fff;
+      background-color: #ffffff;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 400px;
-      text-align: center;
+      width: 95%;
+      max-width: 1200px;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
       color: #4CAF50;
-      font-size: 30px;
+      font-size: 32px;
+      margin-bottom: 10px;
     }
     .stats {
       margin-top: 20px;
       color: #333;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
     }
-    .upgrade-button, .task-button {
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      width: 100%;
+    }
+    .button-container .upgrade-button, 
+    .button-container .task-button {
       background-color: #4CAF50;
       color: white;
       border: none;
       padding: 10px 20px;
-      margin-top: 20px;
       cursor: pointer;
       font-size: 16px;
       border-radius: 5px;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s, transform 0.1s;
+      width: 150px;
+      margin: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    .upgrade-button:hover, .task-button:hover {
+    .button-container .upgrade-button:hover, 
+    .button-container .task-button:hover {
       background-color: #45a049;
     }
-    .upgrade-button:disabled, .task-button:disabled {
+    .task-button:disabled,
+    .upgrade-button:disabled {
       background-color: #ddd;
       cursor: not-allowed;
     }
-    .button-container {
-      margin-top: 30px;
+    .task-button.completed {
+      background-color: #2ecc71;
+      animation: completeAnimation 1s ease-in-out forwards;
+    }
+    @keyframes completeAnimation {
+      0% {
+        background-color: #f39c12;
+      }
+      50% {
+        background-color: #2ecc71;
+      }
+      100% {
+        background-color: #2ecc71;
+      }
+    }
+    .help-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .menu {
+      padding: 15px;
+      background-color: #f1f1f1;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      width: 100%;
+      text-align: center;
+    }
+    .menu h3 {
+      margin-top: 0;
     }
     .tooltip {
       position: relative;
@@ -81,11 +133,8 @@
       visibility: visible;
       opacity: 1;
     }
-    .task-button {
+    .task-button.pending {
       background-color: #f39c12;
-    }
-    .task-button:hover {
-      background-color: #e67e22;
     }
   </style>
 </head>
@@ -94,45 +143,71 @@
   <div id="game-container">
     <h1>School Factory</h1>
     <p>Generate Knowledge Points (KP) and upgrade your school!</p>
-    <p>KP: <span id="kp">0</span></p>
-    <div class="stats">
-      <p>Classroom Upgrade: <span id="classroom-level">0</span></p>
-      <div class="tooltip">
-        <button id="upgrade-classroom" class="upgrade-button">Upgrade Classroom (Cost: 10 KP)</button>
-        <span class="tooltiptext">Increases your base KP generation rate.</span>
-      </div>
-    </div>
     
-    <!-- New Task Section -->
-    <h2>Tasks</h2>
     <div class="stats">
-      <div class="tooltip">
-        <button id="task-study" class="task-button" disabled>Study for KP (Cooldown: 30s)</button>
-        <span class="tooltiptext">Cost: 5 KP. Gain 10 KP after 5 seconds.</span>
-      </div>
+      <p>KP: <span id="kp">0</span></p>
+      <p>Classroom Level: <span id="classroom-level">0</span></p>
     </div>
 
-    <div class="stats">
-      <div class="tooltip">
-        <button id="task-research" class="task-button" disabled>Research for KP (Cooldown: 60s)</button>
-        <span class="tooltiptext">Cost: 15 KP. Gain 30 KP after 10 seconds.</span>
-      </div>
-    </div>
-
-    <!-- Add more tasks here as needed -->
+    <!-- Game Status & Settings -->
+    <button class="help-button" onclick="showHelp()">Help/Settings</button>
 
     <div class="button-container">
-      <button id="upgrade-library" class="upgrade-button" disabled>Unlock Library (Cost: 50 KP)</button>
+      <div class="tooltip">
+        <button id="upgrade-classroom" class="upgrade-button" disabled>Upgrade Classroom</button>
+        <span class="tooltiptext">Requirement: 10 KP</span>
+      </div>
+
+      <!-- Tasks -->
+      <div class="tooltip">
+        <button id="task-study" class="task-button" disabled>Study</button>
+        <span class="tooltiptext">Requirement: 100 KP</span>
+      </div>
+      <div class="tooltip">
+        <button id="task-research" class="task-button" disabled>Research</button>
+        <span class="tooltiptext">Requirement: 250 KP</span>
+      </div>
+      <div class="tooltip">
+        <button id="task-laboratory" class="task-button" disabled>Lab Work</button>
+        <span class="tooltiptext">Requirement: 500 KP</span>
+      </div>
+      <div class="tooltip">
+        <button id="task-programming" class="task-button" disabled>Programming</button>
+        <span class="tooltiptext">Requirement: 1000 KP</span>
+      </div>
+      <div class="tooltip">
+        <button id="task-mentoring" class="task-button" disabled>Mentoring</button>
+        <span class="tooltiptext">Requirement: 2000 KP</span>
+      </div>
+      <!-- Add more tasks (6 more) here, same pattern -->
+    </div>
+
+    <div id="help-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; background-color:white; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+      <h2>Help & Information</h2>
+      <p>Welcome to School Factory! In this game, you generate Knowledge Points (KP) and use them to upgrade your school.</p>
+      <p><strong>Tasks:</strong> Each task has a requirement before it can be started. Once completed, it will reward you with KP!</p>
+      <ul>
+        <li><strong>Study</strong>: Requires 100 KP to start, generates 50 KP after 60 seconds.</li>
+        <li><strong>Research</strong>: Requires 250 KP to start, generates 100 KP after 120 seconds.</li>
+        <li><strong>Lab Work</strong>: Requires 500 KP to start, generates 200 KP after 180 seconds.</li>
+        <li><strong>Programming</strong>: Requires 1000 KP to start, generates 400 KP after 240 seconds.</li>
+        <li><strong>Mentoring</strong>: Requires 2000 KP to start, generates 800 KP after 300 seconds.</li>
+      </ul>
+      <p><strong>Upgrades:</strong> Use KP to upgrade your school, such as upgrading classrooms and unlocking new features like the Library.</p>
+      <p><strong>Auto Save:</strong> The game auto-saves every minute.</p>
+      <button onclick="closeHelp()">Close</button>
     </div>
   </div>
 
   <script>
-    // Variables to store game data
     let knowledgePoints = 0;
     let classroomLevel = 0;
     let taskCooldowns = {
       study: 0,
       research: 0,
+      laboratory: 0,
+      programming: 0,
+      mentoring: 0,
     };
 
     const kpElement = document.getElementById("kp");
@@ -140,8 +215,11 @@
     const upgradeClassroomButton = document.getElementById("upgrade-classroom");
     const taskStudyButton = document.getElementById("task-study");
     const taskResearchButton = document.getElementById("task-research");
+    const taskLaboratoryButton = document.getElementById("task-laboratory");
+    const taskProgrammingButton = document.getElementById("task-programming");
+    const taskMentoringButton = document.getElementById("task-mentoring");
 
-    // Function to load saved progress from localStorage
+    // Load saved progress from localStorage
     function loadProgress() {
       const savedKP = localStorage.getItem('kp');
       const savedClassroomLevel = localStorage.getItem('classroomLevel');
@@ -154,86 +232,98 @@
     function saveProgress() {
       localStorage.setItem('kp', knowledgePoints);
       localStorage.setItem('classroomLevel', classroomLevel);
+      localStorage.setItem('lastAutoSave', Date.now());
     }
 
-    // Updates the UI based on the current game state
+    // Updates UI with current values
     function updateUI() {
       kpElement.textContent = knowledgePoints;
       classroomLevelElement.textContent = classroomLevel;
 
-      // Enable or disable buttons based on current KP
-      upgradeClassroomButton.disabled = knowledgePoints < (classroomLevel + 1) * 10;
-      taskStudyButton.disabled = knowledgePoints < 5 || taskCooldowns.study > 0;
-      taskResearchButton.disabled = knowledgePoints < 15 || taskCooldowns.research > 0;
+      // Enable/Disable buttons based on KP or other requirements
+      upgradeClassroomButton.disabled = knowledgePoints < 10; // Example requirement for upgrading classroom
+      taskStudyButton.disabled = knowledgePoints < 100 || taskCooldowns.study > 0;
+      taskResearchButton.disabled = knowledgePoints < 250 || taskCooldowns.research > 0;
+      taskLaboratoryButton.disabled = knowledgePoints < 500 || taskCooldowns.laboratory > 0;
+      taskProgrammingButton.disabled = knowledgePoints < 1000 || taskCooldowns.programming > 0;
+      taskMentoringButton.disabled = knowledgePoints < 2000 || taskCooldowns.mentoring > 0;
 
-      // Update cooldowns
-      updateCooldowns();
+      // Updating task statuses for progress visibility
+      taskStudyButton.classList.toggle("pending", taskCooldowns.study > 0);
+      taskResearchButton.classList.toggle("pending", taskCooldowns.research > 0);
+      taskLaboratoryButton.classList.toggle("pending", taskCooldowns.laboratory > 0);
+      taskProgrammingButton.classList.toggle("pending", taskCooldowns.programming > 0);
+      taskMentoringButton.classList.toggle("pending", taskCooldowns.mentoring > 0);
     }
 
-    // Updates cooldowns
-    function updateCooldowns() {
-      if (taskCooldowns.study > 0) {
-        taskCooldowns.study--;
-        taskStudyButton.textContent = `Study for KP (Cooldown: ${taskCooldowns.study}s)`;
-      }
-      if (taskCooldowns.research > 0) {
-        taskCooldowns.research--;
-        taskResearchButton.textContent = `Research for KP (Cooldown: ${taskCooldowns.research}s)`;
-      }
-    }
-
-    // Generate KP automatically based on classroom level
+    // Start generating KP automatically based on classroom level
     function generateKP() {
-      knowledgePoints += (1 + classroomLevel); // Add KP based on classroom level
+      knowledgePoints += 1 + classroomLevel; // Increase KP based on classroom level
       updateUI();
     }
+
+    // Auto save every minute
+    setInterval(() => {
+      saveProgress();
+    }, 60000);
 
     // Start generating KP every second
     setInterval(generateKP, 1000);
 
-    // Upgrade the classroom
+    // Upgrade Classroom
     upgradeClassroomButton.addEventListener("click", () => {
-      if (knowledgePoints >= (classroomLevel + 1) * 10) {
-        knowledgePoints -= (classroomLevel + 1) * 10;
+      if (knowledgePoints >= 10) {
+        knowledgePoints -= 10;
         classroomLevel++;
         updateUI();
         saveProgress();
       }
     });
 
-    // Task 1: Study for KP
+    // Task actions (Study, Research, etc.)
+    function startTask(taskName, cooldownTime, reward) {
+      if (knowledgePoints >= reward.requiredKP && taskCooldowns[taskName] === 0) {
+        knowledgePoints -= reward.requiredKP;
+        taskCooldowns[taskName] = cooldownTime;
+
+        setTimeout(() => {
+          knowledgePoints += reward.gainKP;
+          taskCooldowns[taskName] = 0;
+          updateUI();
+          saveProgress();
+        }, cooldownTime * 1000);
+
+        updateUI();
+      }
+    }
+
     taskStudyButton.addEventListener("click", () => {
-      if (knowledgePoints >= 5 && taskCooldowns.study === 0) {
-        knowledgePoints -= 5;
-        taskCooldowns.study = 30;  // 30 seconds cooldown for study
-        setTimeout(() => {
-          knowledgePoints += 10;  // Gain 10 KP after 5 seconds
-          updateUI();
-          saveProgress();
-        }, 5000);  // Study time: 5 seconds
-        updateUI();
-      }
+      startTask("study", 60, { requiredKP: 100, gainKP: 50 });
     });
-
-    // Task 2: Research for KP
     taskResearchButton.addEventListener("click", () => {
-      if (knowledgePoints >= 15 && taskCooldowns.research === 0) {
-        knowledgePoints -= 15;
-        taskCooldowns.research = 60;  // 60 seconds cooldown for research
-        setTimeout(() => {
-          knowledgePoints += 30;  // Gain 30 KP after 10 seconds
-          updateUI();
-          saveProgress();
-        }, 10000);  // Research time: 10 seconds
-        updateUI();
-      }
+      startTask("research", 120, { requiredKP: 250, gainKP: 100 });
+    });
+    taskLaboratoryButton.addEventListener("click", () => {
+      startTask("laboratory", 180, { requiredKP: 500, gainKP: 200 });
+    });
+    taskProgrammingButton.addEventListener("click", () => {
+      startTask("programming", 240, { requiredKP: 1000, gainKP: 400 });
+    });
+    taskMentoringButton.addEventListener("click", () => {
+      startTask("mentoring", 300, { requiredKP: 2000, gainKP: 800 });
     });
 
-    // Load the saved progress when the page loads
+    // Show Help/Settings Modal
+    function showHelp() {
+      document.getElementById('help-modal').style.display = 'block';
+    }
+
+    function closeHelp() {
+      document.getElementById('help-modal').style.display = 'none';
+    }
+
+    // Load saved progress on page load
     window.onload = loadProgress;
-    
-    // Save progress when the page is unloaded
-    window.onbeforeunload = saveProgress;
 
     // Initial UI update
     updateUI();
