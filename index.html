@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Factory</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-image: url('https://www.transparenttextures.com/patterns/diagonal-stripes.png'); /* Soft striped background */
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #game-container {
+      margin-top: 50px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    h1 {
+      color: #4CAF50;
+      font-size: 30px;
+    }
+    .stats {
+      margin-top: 20px;
+      color: #333;
+    }
+    .upgrade-button, .task-button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .upgrade-button:hover, .task-button:hover {
+      background-color: #45a049;
+    }
+    .upgrade-button:disabled, .task-button:disabled {
+      background-color: #ddd;
+      cursor: not-allowed;
+    }
+    .button-container {
+      margin-top: 30px;
+    }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 220px;
+      background-color: #6c757d;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -110px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    .task-button {
+      background-color: #f39c12;
+    }
+    .task-button:hover {
+      background-color: #e67e22;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <h1>School Factory</h1>
+    <p>Generate Knowledge Points (KP) and upgrade your school!</p>
+    <p>KP: <span id="kp">0</span></p>
+    <div class="stats">
+      <p>Classroom Upgrade: <span id="classroom-level">0</span></p>
+      <div class="tooltip">
+        <button id="upgrade-classroom" class="upgrade-button">Upgrade Classroom (Cost: 10 KP)</button>
+        <span class="tooltiptext">Increases your base KP generation rate.</span>
+      </div>
+    </div>
+    
+    <!-- New Task Section -->
+    <h2>Tasks</h2>
+    <div class="stats">
+      <div class="tooltip">
+        <button id="task-study" class="task-button" disabled>Study for KP (Cooldown: 30s)</button>
+        <span class="tooltiptext">Cost: 5 KP. Gain 10 KP after 5 seconds.</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="tooltip">
+        <button id="task-research" class="task-button" disabled>Research for KP (Cooldown: 60s)</button>
+        <span class="tooltiptext">Cost: 15 KP. Gain 30 KP after 10 seconds.</span>
+      </div>
+    </div>
+
+    <!-- Add more tasks here as needed -->
+
+    <div class="button-container">
+      <button id="upgrade-library" class="upgrade-button" disabled>Unlock Library (Cost: 50 KP)</button>
+    </div>
+  </div>
+
+  <script>
+    // Variables to store game data
+    let knowledgePoints = 0;
+    let classroomLevel = 0;
+    let taskCooldowns = {
+      study: 0,
+      research: 0,
+    };
+
+    const kpElement = document.getElementById("kp");
+    const classroomLevelElement = document.getElementById("classroom-level");
+    const upgradeClassroomButton = document.getElementById("upgrade-classroom");
+    const taskStudyButton = document.getElementById("task-study");
+    const taskResearchButton = document.getElementById("task-research");
+
+    // Function to load saved progress from localStorage
+    function loadProgress() {
+      const savedKP = localStorage.getItem('kp');
+      const savedClassroomLevel = localStorage.getItem('classroomLevel');
+      knowledgePoints = savedKP ? parseInt(savedKP) : 0;
+      classroomLevel = savedClassroomLevel ? parseInt(savedClassroomLevel) : 0;
+      updateUI();
+    }
+
+    // Save game progress to localStorage
+    function saveProgress() {
+      localStorage.setItem('kp', knowledgePoints);
+      localStorage.setItem('classroomLevel', classroomLevel);
+    }
+
+    // Updates the UI based on the current game state
+    function updateUI() {
+      kpElement.textContent = knowledgePoints;
+      classroomLevelElement.textContent = classroomLevel;
+
+      // Enable or disable buttons based on current KP
+      upgradeClassroomButton.disabled = knowledgePoints < (classroomLevel + 1) * 10;
+      taskStudyButton.disabled = knowledgePoints < 5 || taskCooldowns.study > 0;
+      taskResearchButton.disabled = knowledgePoints < 15 || taskCooldowns.research > 0;
+
+      // Update cooldowns
+      updateCooldowns();
+    }
+
+    // Updates cooldowns
+    function updateCooldowns() {
+      if (taskCooldowns.study > 0) {
+        taskCooldowns.study--;
+        taskStudyButton.textContent = `Study for KP (Cooldown: ${taskCooldowns.study}s)`;
+      }
+      if (taskCooldowns.research > 0) {
+        taskCooldowns.research--;
+        taskResearchButton.textContent = `Research for KP (Cooldown: ${taskCooldowns.research}s)`;
+      }
+    }
+
+    // Generate KP automatically based on classroom level
+    function generateKP() {
+      knowledgePoints += (1 + classroomLevel); // Add KP based on classroom level
+      updateUI();
+    }
+
+    // Start generating KP every second
+    setInterval(generateKP, 1000);
+
+    // Upgrade the classroom
+    upgradeClassroomButton.addEventListener("click", () => {
+      if (knowledgePoints >= (classroomLevel + 1) * 10) {
+        knowledgePoints -= (classroomLevel + 1) * 10;
+        classroomLevel++;
+        updateUI();
+        saveProgress();
+      }
+    });
+
+    // Task 1: Study for KP
+    taskStudyButton.addEventListener("click", () => {
+      if (knowledgePoints >= 5 && taskCooldowns.study === 0) {
+        knowledgePoints -= 5;
+        taskCooldowns.study = 30;  // 30 seconds cooldown for study
+        setTimeout(() => {
+          knowledgePoints += 10;  // Gain 10 KP after 5 seconds
+          updateUI();
+          saveProgress();
+        }, 5000);  // Study time: 5 seconds
+        updateUI();
+      }
+    });
+
+    // Task 2: Research for KP
+    taskResearchButton.addEventListener("click", () => {
+      if (knowledgePoints >= 15 && taskCooldowns.research === 0) {
+        knowledgePoints -= 15;
+        taskCooldowns.research = 60;  // 60 seconds cooldown for research
+        setTimeout(() => {
+          knowledgePoints += 30;  // Gain 30 KP after 10 seconds
+          updateUI();
+          saveProgress();
+        }, 10000);  // Research time: 10 seconds
+        updateUI();
+      }
+    });
+
+    // Load the saved progress when the page loads
+    window.onload = loadProgress;
+    
+    // Save progress when the page is unloaded
+    window.onbeforeunload = saveProgress;
+
+    // Initial UI update
+    updateUI();
+  </script>
+</body>
+</html>
